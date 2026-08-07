@@ -19,6 +19,11 @@ export default defineTool({
       .optional()
       .describe("Optional topic hint, e.g. 'sources' or 'roadmap'. Currently informational only."),
   },
+  outputSchema: { overview: z.string() },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: () => ({ content: [{ type: "text" as const, text: OVERVIEW }] }),
+  handler: () => ({
+    content: [{ type: "text" as const, text: OVERVIEW }],
+    structuredContent: { overview: OVERVIEW },
+  }),
 });
+
