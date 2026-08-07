@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-import logoAsset from "../../../bitboundpay_logo_flow_monogram.png";
+const logoAsset = "/assets/bitboundpay_logo.png";
 
 const links = [
   { label: "Vision", href: "#vision" },
@@ -41,14 +41,13 @@ export function Nav() {
         <a
           href="#top"
           aria-label="BitBoundPay home"
-          className="min-w-0 shrink-0 text-[0.82rem] font-medium tracking-[0.22em] text-foreground uppercase"
+          className="flex min-w-0 shrink-0 items-center"
         >
           <span className="block h-8 w-8 overflow-hidden rounded-[0.35rem]">
             <img
               src={logoAsset}
               alt="BitBoundPay"
-              className="max-w-none"
-              style={{ height: "116px", transform: "translate(-96px, -22px)" }}
+              className="block h-full w-full object-contain"
             />
           </span>
         </a>

@@ -1,4 +1,4 @@
-import logoAsset from "../../../bitboundpay_logo_flow_monogram.png";
+const logoAsset = "/assets/bitboundpay_logo.png";
 
 export function Footer() {
   const links = [
@@ -16,8 +16,7 @@ export function Footer() {
             <img
               src={logoAsset}
               alt="BitBoundPay"
-              className="max-w-none"
-              style={{ height: "116px", transform: "translate(-96px, -22px)" }}
+              className="block h-full w-full object-contain"
             />
           </div>
           <p className="mt-3 text-sm text-muted-foreground">The AI Agent Operating System</p>
