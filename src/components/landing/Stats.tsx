@@ -23,7 +23,7 @@ function Counter({ value, suffix }: { value: number; suffix: string }) {
     let raf = 0;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting) return;
+        if (!entry?.isIntersecting) return;
         observer.disconnect();
         const start = performance.now();
         const dur = 1400;
