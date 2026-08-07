@@ -60,7 +60,7 @@ export function Nav() {
         <div className="flex shrink-0 items-center gap-2">
           <a
             href="#waitlist"
-            className="hidden rounded-full border border-border bg-secondary px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted sm:inline-flex"
+            className="hidden rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 sm:inline-flex"
           >
             Join Waitlist
           </a>
