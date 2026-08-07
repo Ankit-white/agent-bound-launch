@@ -121,7 +121,7 @@
 
 @utility grid-lines {
   background-image:
-    linear-gradient(to right, oklch(0.19 0.005 260 / 7%) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.19 0.005 260 / 7%) 1px, transparent 1px);
+    linear-gradient(to right, oklch(0.22 0.02 150 / 8%) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.22 0.02 150 / 8%) 1px, transparent 1px);
   background-size: 72px 72px;
 }
