@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { joinWaitlist } from "@/lib/waitlist.functions";
 import { Reveal } from "./Reveal";
 
 const schema = z.object({
@@ -14,6 +15,7 @@ export function Waitlist() {
   const [form, setForm] = useState({ name: "", email: "", building: "" });
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
+  const submit = useServerFn(joinWaitlist);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,18 +26,20 @@ export function Waitlist() {
     }
     setError(null);
     setStatus("loading");
-    const { error: dbError } = await supabase.from("waitlist_signups").insert({
-      name: parsed.data.name,
-      email: parsed.data.email,
-      building: parsed.data.building || null,
-    });
-    if (dbError) {
+    try {
+      const result = await submit({ data: parsed.data });
+      if (!result.ok) {
+        setStatus("idle");
+        setError(result.error);
+        return;
+      }
+      setStatus("done");
+    } catch {
       setStatus("idle");
       setError("Something went wrong. Please try again.");
-      return;
     }
-    setStatus("done");
   };
+
 
   const field =
     "w-full rounded-xl border border-border bg-surface px-4 py-4 text-base text-foreground placeholder:text-muted-foreground/60 outline-none transition-colors focus:border-primary/60 focus:ring-2 focus:ring-ring";
