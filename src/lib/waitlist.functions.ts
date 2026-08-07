@@ -74,45 +74,60 @@ export const joinWaitlist = createServerFn({ method: "POST" })
 
     if (!domain || DISPOSABLE_DOMAINS.has(domain)) {
       return {
-        ok: false as const,
-        error: "Email not verified. Please use a verified email address.",
+        success: false as const,
+        message: "Email not verified. Please use a verified email address.",
       };
     }
 
     if (!(await domainHasMailServer(domain))) {
       return {
-        ok: false as const,
-        error: "Email not verified. Please use a verified email address.",
+        success: false as const,
+        message: "Email not verified. Please use a verified email address.",
       };
     }
 
-    const key = process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_ANON_KEY"]!;
-    const supabase = createClient<Database>(process.env["SUPABASE_URL"]!, key, {
-      auth: { persistSession: false, autoRefreshToken: false },
-      global: {
-        fetch: (input, init) => {
-          const h = new Headers(init?.headers);
-          if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) {
-            h.delete("Authorization");
-          }
-          h.set("apikey", key);
-          return fetch(input, { ...init, headers: h });
-        },
-      },
-    });
+    const url = process.env["SUPABASE_URL"];
+    const key = process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_ANON_KEY"];
 
-    const { error } = await supabase.from("waitlist_signups").insert({
-      name: data.name,
-      email,
-      building: data.building || null,
-    });
-
-    if (error) {
-      if (error.code === "23505") {
-        return { ok: false as const, error: "This email is already on the waitlist." };
-      }
-      return { ok: false as const, error: "Something went wrong. Please try again." };
+    if (!url || !key) {
+      console.error("[Waitlist] Missing Supabase configuration", {
+        missing: [!url && "SUPABASE_URL", !key && "SUPABASE_PUBLISHABLE_KEY"].filter(Boolean),
+      });
+      return { success: false as const, message: "Something went wrong. Please try again." };
     }
 
-    return { ok: true as const };
+    try {
+      const supabase = createClient<Database>(url, key, {
+        auth: { persistSession: false, autoRefreshToken: false },
+        global: {
+          fetch: (input, init) => {
+            const h = new Headers(init?.headers);
+            if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) {
+              h.delete("Authorization");
+            }
+            h.set("apikey", key);
+            return fetch(input, { ...init, headers: h });
+          },
+        },
+      });
+
+      const { error } = await supabase.from("waitlist_signups").insert({
+        name: data.name,
+        email,
+        building: data.building || null,
+      });
+
+      if (error) {
+        console.error("[Waitlist] Supabase insert failed", error);
+        if (error.code === "23505") {
+          return { success: false as const, message: "You're already on the waitlist." };
+        }
+        return { success: false as const, message: "Something went wrong. Please try again." };
+      }
+
+      return { success: true as const, message: "Successfully joined the waitlist." };
+    } catch (error) {
+      console.error("[Waitlist] Supabase request failed", error);
+      return { success: false as const, message: "Something went wrong. Please try again." };
+    }
   });

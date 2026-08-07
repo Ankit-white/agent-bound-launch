@@ -28,13 +28,14 @@ export function Waitlist() {
     setStatus("loading");
     try {
       const result = await submit({ data: parsed.data });
-      if (!result.ok) {
+      if (!result.success) {
         setStatus("idle");
-        setError(result.error);
+        setError(result.message);
         return;
       }
       setStatus("done");
-    } catch {
+    } catch (error) {
+      console.error("[Waitlist] Request failed", error);
       setStatus("idle");
       setError("Something went wrong. Please try again.");
     }

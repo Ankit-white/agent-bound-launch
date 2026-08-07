@@ -9,7 +9,13 @@ import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 
 export default defineConfig({
   vite: {
-    plugins: [mcpPlugin()],
+    // Vite 8 resolves tsconfig paths natively; keep this enabled while the
+    // shared Lovable wrapper still injects its legacy peer plugin.
+    resolve: { tsconfigPaths: true },
+    // @lovable.dev/mcp-js 0.26.1 compares Vite's normalized POSIX root with
+    // Windows path.resolve() output. Generated MCP routes remain checked in,
+    // so skip only the broken generator on Windows.
+    plugins: process.platform === "win32" ? [] : [mcpPlugin()],
   },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
