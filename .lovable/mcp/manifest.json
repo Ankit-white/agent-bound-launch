@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "bitboundpay-agent-os",
+      "version": "0.1.0",
+      "title": "BitBoundPay: Agent OS"
+    },
+    "tools": [
+      {
+        "name": "get_product_info",
+        "title": "Get BitBoundPay product info",
+        "description": "Return a public overview of BitBoundPay: what it is, its key capabilities, and its launch status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "topic": {
+              "description": "Optional topic hint, e.g. 'sources' or 'roadmap'. Currently informational only.",
+              "type": "string"
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "join_waitlist",
+        "title": "Join the BitBoundPay waitlist",
+        "description": "Add someone to the BitBoundPay early-access waitlist. Rejects disposable or unverifiable email domains, and each email can join only once.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Full name of the person joining."
+            },
+            "email": {
+              "type": "string",
+              "maxLength": 255,
+              "format": "email",
+              "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+              "description": "A real, deliverable email address."
+            },
+            "building": {
+              "description": "Optional note about what they are building.",
+              "type": "string",
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "name",
+            "email"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
