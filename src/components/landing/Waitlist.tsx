@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
+import { emailSchema } from "@/lib/email-validation";
 import { joinWaitlist } from "@/lib/waitlist.functions";
 import { Reveal } from "./Reveal";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Please enter your name").max(100, "Name is too long"),
-  email: z.string().trim().email("Enter a valid email address").max(255, "Email is too long"),
+  email: emailSchema,
   building: z.string().trim().max(1000, "Please keep this under 1000 characters"),
 });
 
@@ -68,9 +69,9 @@ export function Waitlist() {
               <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-primary">
                 <Check className="h-6 w-6" aria-hidden />
               </span>
-              <p className="mt-6 font-display text-3xl tracking-tight">You're on the waitlist.</p>
+              <p className="mt-6 font-display text-3xl tracking-tight">Check your inbox.</p>
               <p className="mt-3 text-sm text-muted-foreground">
-                We'll notify you when BitBoundPay launches.
+                Click the verification link to join the BitBoundPay waitlist.
               </p>
             </div>
           ) : (
@@ -87,7 +88,7 @@ export function Waitlist() {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className={field}
-                  placeholder="Ada Lovelace"
+                  placeholder="Your name"
                 />
               </div>
               <div>
@@ -103,7 +104,7 @@ export function Waitlist() {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className={field}
-                  placeholder="you@company.com"
+                  placeholder="you@example.com"
                 />
               </div>
               <div>
@@ -117,7 +118,7 @@ export function Waitlist() {
                   value={form.building}
                   onChange={(e) => setForm({ ...form, building: e.target.value })}
                   className={`${field} resize-none`}
-                  placeholder="A support agent that reads our docs..."
+                  placeholder="Tell us what you want to build with BitBoundPay..."
                 />
               </div>
 

@@ -2,7 +2,7 @@ import { Cloud, Cpu, FileArchive, Github, Sparkles, Workflow } from "lucide-reac
 import { Reveal } from "./Reveal";
 
 const sources = [
-  { icon: Sparkles, title: "Native BBP Agent", desc: "Composed inside the platform." },
+  { icon: Sparkles, title: "Native BitBoundPay Agent", desc: "Composed inside the platform." },
   { icon: Workflow, title: "n8n Workflow", desc: "Your automation, now an agent." },
   { icon: Github, title: "GitHub Repository", desc: "Deploy straight from source." },
   { icon: FileArchive, title: "ZIP Package", desc: "Upload and run in seconds." },

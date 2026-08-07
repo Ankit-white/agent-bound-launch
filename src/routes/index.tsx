@@ -11,9 +11,9 @@ import { Roadmap } from "@/components/landing/Roadmap";
 import { Waitlist } from "@/components/landing/Waitlist";
 import { Footer } from "@/components/landing/Footer";
 
-const title = "BitBoundPay — The AI Agent Operating System";
+const title = "BitBoundPay — AI Agent Operating System";
 const description =
-  "Build, import, deploy and manage AI agents from one platform. Bring your own AI provider, n8n workflows, GitHub repos, ZIP packages or local AI. Join early access.";
+  "BitBoundPay is the AI Agent Operating System for building, importing, deploying, and managing AI agents from one platform.";
 
 export const Route = createFileRoute("/")({
   head: () => ({

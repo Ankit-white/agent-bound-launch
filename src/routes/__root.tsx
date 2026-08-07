@@ -15,13 +15,19 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#F7F7F5" },
-      { title: "BitBoundPay — Economic Infrastructure for Autonomous Systems" },
+      { title: "BitBoundPay — AI Agent Operating System" },
       {
         name: "description",
         content:
-          "BitBoundPay is building coordination, identity, value exchange and trust infrastructure for autonomous AI systems. Join the early access waitlist.",
+          "BitBoundPay is the AI Agent Operating System for building, importing, deploying, and managing AI agents from one platform.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:title", content: "BitBoundPay — AI Agent Operating System" },
+      {
+        property: "og:description",
+        content:
+          "BitBoundPay is the AI Agent Operating System for building, importing, deploying, and managing AI agents from one platform.",
+      },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [

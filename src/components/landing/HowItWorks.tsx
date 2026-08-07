@@ -2,7 +2,7 @@ import { Reveal } from "./Reveal";
 
 const steps = [
   { n: "01", title: "Create or Import Agent", desc: "Start native, or bring an n8n workflow, GitHub repository or ZIP package." },
-  { n: "02", title: "Connect AI Provider", desc: "Attach your own keys or point BBP at a local runtime." },
+  { n: "02", title: "Connect AI Provider", desc: "Attach your own keys or point BitBoundPay at a local runtime." },
   { n: "03", title: "Deploy", desc: "Ship the agent to the execution engine in one step." },
   { n: "04", title: "Chat, Automate & Scale", desc: "Run conversations, automate workflows, and grow without limits." },
 ];

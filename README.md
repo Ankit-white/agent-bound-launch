@@ -280,7 +280,7 @@ Premium Grid Cards.
 
 Native AI Agents
 
-Create agents directly inside BBP.
+Create agents directly inside BitBoundPay.
 
 n8n Integration
 
@@ -374,7 +374,7 @@ Chat, Automate & Scale
 
 Display six premium cards.
 
-Native BBP Agent
+Native BitBoundPay Agent
 
 n8n Workflow
 
@@ -614,3 +614,15 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Waitlist email verification
+
+Configure these server-side environment variables before deploying the waitlist flow:
+
+- `APP_URL`: Public application origin used to build verification links, for example `https://bitboundpay.com`.
+- `RESEND_API_KEY`: Resend API key authorized to send verification messages.
+- `RESEND_FROM_EMAIL`: Verified Resend sender, for example `BitBoundPay <waitlist@bitboundpay.com>`.
+- `SUPABASE_URL`: Supabase project URL.
+- `SUPABASE_SERVICE_ROLE_KEY`: Server-only Supabase service-role key. Never expose this value to client code.
+
+Apply the Supabase migrations before enabling submissions. Verification links expire after 24 hours, and an entry becomes active only after the recipient opens the link.

@@ -15,7 +15,7 @@ import {
 import { Reveal } from "./Reveal";
 
 const features = [
-  { icon: Sparkles, title: "Native AI Agents", desc: "Create agents directly inside BBP." },
+  { icon: Sparkles, title: "Native AI Agents", desc: "Create agents directly inside BitBoundPay." },
   { icon: Workflow, title: "n8n Integration", desc: "Import workflows instantly." },
   { icon: Github, title: "GitHub Import", desc: "Deploy directly from repositories." },
   { icon: FileArchive, title: "ZIP Import", desc: "Upload packaged agents." },

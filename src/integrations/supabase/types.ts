@@ -21,6 +21,11 @@ export type Database = {
           email: string
           id: string
           name: string
+          status: string
+          verification_token_expires_at: string | null
+          verification_token_hash: string | null
+          verified: boolean
+          verified_at: string | null
         }
         Insert: {
           building?: string | null
@@ -28,6 +33,11 @@ export type Database = {
           email: string
           id?: string
           name: string
+          status?: string
+          verification_token_expires_at?: string | null
+          verification_token_hash?: string | null
+          verified?: boolean
+          verified_at?: string | null
         }
         Update: {
           building?: string | null
@@ -35,6 +45,11 @@ export type Database = {
           email?: string
           id?: string
           name?: string
+          status?: string
+          verification_token_expires_at?: string | null
+          verification_token_hash?: string | null
+          verified?: boolean
+          verified_at?: string | null
         }
         Relationships: []
       }
@@ -43,7 +58,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      begin_waitlist_verification: {
+        Args: {
+          p_signup_building: string
+          p_signup_email: string
+          p_signup_name: string
+          p_token_expires_at: string
+          p_token_hash: string
+        }
+        Returns: { result: string; signup_id: string | null }[]
+      }
+      cancel_waitlist_verification: {
+        Args: { p_signup_id: string; p_token_hash: string }
+        Returns: undefined
+      }
+      confirm_waitlist_verification: {
+        Args: { p_token_hash: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
