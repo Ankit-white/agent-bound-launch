@@ -25,7 +25,22 @@ export const joinWaitlist = createServerFn({ method: "POST" })
           import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"],
         ),
       });
-      console.error("[Waitlist] Verification request failed", error);
+      const value = error as {
+        message?: unknown;
+        code?: unknown;
+        status?: unknown;
+        details?: unknown;
+        stack?: unknown;
+      };
+      console.error("[Waitlist] Verification request failed", {
+        error: {
+          message: typeof value?.message === "string" ? value.message : String(error),
+          code: value?.code,
+          status: value?.status,
+          details: value?.details,
+          stack: value?.stack,
+        },
+      });
       return { success: false as const, message: "Something went wrong. Please try again." };
     }
   });

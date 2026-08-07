@@ -21,29 +21,78 @@ export const Route = createFileRoute("/verify-waitlist")({
         const code = url.searchParams.get("code");
         if (!code)
           return page(
-            "Invalid verification link",
-            "This Supabase confirmation link is missing its code.",
+            "Verification failed",
+            "Verification link expired or invalid. Please request a new verification email.",
             400,
           );
         try {
+          console.info("[Waitlist] REDIRECT STEP 1: Exchanging verification code");
           const { createSupabaseAuthClient } =
             await import("@/integrations/supabase/client.server");
           const auth = createSupabaseAuthClient();
           const { data, error } = await auth.auth.exchangeCodeForSession(code);
-          if (error || !data.user?.email_confirmed_at)
+          if (error || !data.user?.email_confirmed_at) {
+            const failure = error ?? new Error("Supabase Auth did not confirm the user");
+            const value = failure as {
+              message?: unknown;
+              code?: unknown;
+              status?: unknown;
+              details?: unknown;
+              stack?: unknown;
+            };
+            console.error("[Waitlist] REDIRECT STEP 1 failed", {
+              error: {
+                message: typeof value.message === "string" ? value.message : String(failure),
+                code: value.code,
+                status: value.status,
+                details: value.details,
+                stack: value.stack,
+              },
+            });
             return page(
-              "Unable to verify email",
-              "The Supabase confirmation link is invalid or expired.",
+              "Verification failed",
+              "Verification link expired or invalid. Please request a new verification email.",
               400,
             );
+          }
+          console.info("[Waitlist] REDIRECT STEP 1: Auth response", {
+            userConfirmed: true,
+          });
           const { activateVerifiedWaitlistEntry } = await import("@/lib/waitlist.service");
           const result = await activateVerifiedWaitlistEntry(data.user.id, data.user.email ?? "");
-          return result.success
-            ? page("Email verified", "Your waitlist entry is now active.")
-            : page("Email verified", result.message, 409);
+          if (result.success) {
+            return new Response(null, {
+              status: 303,
+              headers: { Location: "/waitlist-success", "Cache-Control": "no-store" },
+            });
+          }
+          return page(
+            "Verification failed",
+            "Verification link expired or invalid. Please request a new verification email.",
+            409,
+          );
         } catch (error) {
-          console.error("[Waitlist] Supabase confirmation failed", error);
-          return page("Unable to verify email", "Please try again later.", 500);
+          const value = error as {
+            message?: unknown;
+            code?: unknown;
+            status?: unknown;
+            details?: unknown;
+            stack?: unknown;
+          };
+          console.error("[Waitlist] Redirect verification failed", {
+            error: {
+              message: typeof value?.message === "string" ? value.message : String(error),
+              code: value?.code,
+              status: value?.status,
+              details: value?.details,
+              stack: value?.stack,
+            },
+          });
+          return page(
+            "Verification failed",
+            "Verification link expired or invalid. Please request a new verification email.",
+            500,
+          );
         }
       },
     },

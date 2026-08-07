@@ -21,14 +21,29 @@ export function Waitlist() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.info("[Waitlist] STEP 1: Form received");
+
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
+      console.error("[Waitlist] STEP 2 failed", {
+        error: {
+          message: parsed.error.issues[0]?.message ?? "Please check your details",
+          code: parsed.error.issues[0]?.code,
+          status: undefined,
+          details: parsed.error.issues,
+          stack: parsed.error.stack,
+        },
+      });
       setError(parsed.error.issues[0]?.message ?? "Please check your details");
       return;
     }
+    console.info("[Waitlist] STEP 2: Validation passed");
     setError(null);
     setStatus("loading");
+
+    let failedStep = 3;
     try {
+      console.info("[Waitlist] STEP 3: Calling Supabase Auth signUp()");
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: parsed.data.email,
         password: crypto.randomUUID() + crypto.randomUUID(),
@@ -39,15 +54,51 @@ export function Waitlist() {
       });
       if (authError || !authData.user)
         throw authError ?? new Error("Supabase Auth did not create a user");
+      console.info("[Waitlist] STEP 4: Auth response", {
+        userCreated: Boolean(authData.user),
+        sessionCreated: Boolean(authData.session),
+      });
+
+      failedStep = 5;
+      console.info("[Waitlist] STEP 5: Creating waitlist record");
       const result = await submit({ data: { ...parsed.data, authUserId: authData.user.id } });
+      if (!result.success) {
+        console.error("[Waitlist] STEP 6 failed", {
+          error: {
+            message: result.message,
+            code: undefined,
+            status: undefined,
+            details: { success: result.success },
+            stack: undefined,
+          },
+        });
+      } else {
+        console.info("[Waitlist] STEP 6: RPC response", { success: true });
+      }
       if (!result.success) {
         setStatus("idle");
         setError(result.message);
         return;
       }
+      console.info("[Waitlist] STEP 7: Success");
       setStatus("done");
     } catch (error) {
-      console.error("[Waitlist] Request failed", error);
+      const value = error as {
+        message?: unknown;
+        code?: unknown;
+        status?: unknown;
+        details?: unknown;
+        stack?: unknown;
+      };
+      console.error(`[Waitlist] STEP ${failedStep} failed`, {
+        error: {
+          message: typeof value?.message === "string" ? value.message : String(error),
+          code: value?.code,
+          status: value?.status,
+          details: value?.details,
+          stack: value?.stack,
+        },
+      });
       setStatus("idle");
       setError("Something went wrong. Please try again.");
     }
@@ -77,14 +128,26 @@ export function Waitlist() {
         </Reveal>
         <Reveal delay={0.12}>
           {status === "done" ? (
-            <div className="surface-card mt-12 rounded-2xl px-6 py-14 text-center">
+            <div className="surface-card mt-12 rounded-2xl px-6 py-12 text-center sm:px-10">
               <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-primary">
                 <Check className="h-6 w-6" aria-hidden />
               </span>
-              <p className="mt-6 font-display text-3xl tracking-tight">Check your inbox.</p>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Click the verification link to join the BitBoundPay waitlist.
-              </p>
+              <h3 className="mt-6 font-display text-3xl tracking-tight">Verification Email Sent</h3>
+              <div className="mx-auto mt-4 max-w-lg space-y-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                <p>We've sent a verification link to your email address.</p>
+                <p>
+                  Please verify your email to confirm your place on the BitBoundPay Early Access
+                  waitlist.
+                </p>
+                <p>Check your spam folder if you don't see the email.</p>
+              </div>
+              <button
+                type="button"
+                disabled
+                className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-8 py-5 text-base font-medium text-primary-foreground opacity-70"
+              >
+                Verification Email Sent <Check className="h-4 w-4" aria-hidden />
+              </button>
             </div>
           ) : (
             <form onSubmit={onSubmit} className="mt-12 space-y-4" noValidate>

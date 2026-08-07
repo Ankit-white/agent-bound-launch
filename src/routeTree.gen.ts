@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as VerifyWaitlistRouteImport } from './routes/verify-waitlist'
+import { Route as WaitlistSuccessRouteImport } from './routes/waitlist-success'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -29,6 +30,11 @@ const McpRoute = McpRouteImport.update({
 const VerifyWaitlistRoute = VerifyWaitlistRouteImport.update({
   id: '/verify-waitlist',
   path: '/verify-waitlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WaitlistSuccessRoute = WaitlistSuccessRouteImport.update({
+  id: '/waitlist-success',
+  path: '/waitlist-success',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotmcpChar93ListToolsRoute =
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/mcp': typeof McpRoute
   '/verify-waitlist': typeof VerifyWaitlistRoute
+  '/waitlist-success': typeof WaitlistSuccessRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/mcp': typeof McpRoute
   '/verify-waitlist': typeof VerifyWaitlistRoute
+  '/waitlist-success': typeof WaitlistSuccessRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -71,6 +79,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/mcp': typeof McpRoute
   '/verify-waitlist': typeof VerifyWaitlistRoute
+  '/waitlist-success': typeof WaitlistSuccessRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -81,6 +90,7 @@ export interface FileRouteTypes {
     | '/'
     | '/mcp'
     | '/verify-waitlist'
+    | '/waitlist-success'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/.mcp/invoke-tool/$tool'
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/'
     | '/mcp'
     | '/verify-waitlist'
+    | '/waitlist-success'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/.mcp/invoke-tool/$tool'
@@ -97,6 +108,7 @@ export interface FileRouteTypes {
     | '/'
     | '/mcp'
     | '/verify-waitlist'
+    | '/waitlist-success'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/.mcp/invoke-tool/$tool'
@@ -106,6 +118,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   McpRoute: typeof McpRoute
   VerifyWaitlistRoute: typeof VerifyWaitlistRoute
+  WaitlistSuccessRoute: typeof WaitlistSuccessRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -132,6 +145,13 @@ declare module '@tanstack/react-router' {
       path: '/verify-waitlist'
       fullPath: '/verify-waitlist'
       preLoaderRoute: typeof VerifyWaitlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/waitlist-success': {
+      id: '/waitlist-success'
+      path: '/waitlist-success'
+      fullPath: '/waitlist-success'
+      preLoaderRoute: typeof WaitlistSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/list-tools': {
@@ -162,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   McpRoute: McpRoute,
   VerifyWaitlistRoute: VerifyWaitlistRoute,
+  WaitlistSuccessRoute: WaitlistSuccessRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
