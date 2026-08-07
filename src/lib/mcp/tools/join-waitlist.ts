@@ -71,18 +71,20 @@ export default defineTool({
       .optional()
       .describe("Optional note about what they are building."),
   },
+  outputSchema: { joined: z.boolean(), message: z.string() },
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
   handler: async ({ name, email, building }) => {
     const normalized = email.toLowerCase();
     const domain = normalized.split("@")[1] ?? "";
 
+    const fail = (message: string) => ({
+      content: [{ type: "text" as const, text: message }],
+      structuredContent: { joined: false, message },
+      isError: true,
+    });
+
     if (!domain || DISPOSABLE_DOMAINS.has(domain) || !(await domainHasMailServer(domain))) {
-      return {
-        content: [
-          { type: "text" as const, text: "Email not verified. Please use a verified email address." },
-        ],
-        isError: true,
-      };
+      return fail("Email not verified. Please use a verified email address.");
     }
 
     const supabase = supabaseAnon();
@@ -91,18 +93,18 @@ export default defineTool({
       .insert({ name, email: normalized, building: building || null });
 
     if (error) {
-      const message =
+      return fail(
         error.code === "23505"
           ? "This email is already on the waitlist."
-          : "Could not join the waitlist right now. Please try again.";
-      return { content: [{ type: "text" as const, text: message }], isError: true };
+          : "Could not join the waitlist right now. Please try again.",
+      );
     }
 
+    const message = `${name} has been added to the BitBoundPay waitlist.`;
     return {
-      content: [
-        { type: "text" as const, text: `${name} has been added to the BitBoundPay waitlist.` },
-      ],
-      structuredContent: { joined: true, email: normalized },
+      content: [{ type: "text" as const, text: message }],
+      structuredContent: { joined: true, message },
     };
   },
 });
+
