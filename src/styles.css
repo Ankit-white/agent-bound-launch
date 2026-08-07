@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * BitBoundPay design system — dark only.
+ * BitBoundPay design system — light editorial.
  * Editorial typography-first, electric blue + violet accents.
  */
 
@@ -121,7 +121,7 @@
 
 @utility grid-lines {
   background-image:
-    linear-gradient(to right, oklch(1 0 0 / 4%) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(1 0 0 / 4%) 1px, transparent 1px);
+    linear-gradient(to right, oklch(0.19 0.005 260 / 7%) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.19 0.005 260 / 7%) 1px, transparent 1px);
   background-size: 72px 72px;
 }
