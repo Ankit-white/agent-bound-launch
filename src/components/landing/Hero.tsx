@@ -6,15 +6,20 @@ export function Hero() {
       id="top"
       className="relative flex min-h-[92svh] items-center overflow-hidden px-5 pt-28 pb-20 sm:px-8 sm:pt-36"
     >
-      <div
+      <svg
         aria-hidden
-        className="grid-lines pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(70%_60%_at_50%_35%,black,transparent)]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute top-[-18%] left-1/2 h-[520px] w-[min(1100px,120vw)] -translate-x-1/2 rounded-[50%] opacity-25 blur-[120px]"
-        style={{ background: "var(--gradient-accent)" }}
-      />
+        viewBox="0 0 1200 800"
+        preserveAspectRatio="xMidYMid slice"
+        className="pointer-events-none absolute inset-0 h-full w-full text-primary/20 [mask-image:radial-gradient(75%_65%_at_50%_45%,black,transparent)]"
+      >
+        <g fill="none" stroke="currentColor" strokeWidth="1">
+          <polygon points="600,40 1130,400 600,760 70,400" />
+          <polygon points="600,140 980,400 600,660 220,400" />
+          <path d="M70 400H1130M600 40V760M220 400 600 140 980 400 600 660Z" />
+          <path d="M70 400 600 140M1130 400 600 140M70 400 600 660M1130 400 600 660" />
+        </g>
+      </svg>
+
 
       <div className="relative mx-auto w-full max-w-5xl text-center">
         <motion.span
