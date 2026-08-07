@@ -34,7 +34,7 @@ NOT colorful gradients everywhere.
 
 Typography and spacing should be the hero.
 
---------------------------------------------------
+---
 
 # PRODUCT
 
@@ -62,7 +62,7 @@ Users can:
 
 (OpenAI, OpenRouter, Anthropic, Gemini, Groq etc.)
 
---------------------------------------------------
+---
 
 # PURPOSE OF WEBSITE
 
@@ -78,7 +78,7 @@ Goal:
 
 3. Collect Waitlist Signups.
 
---------------------------------------------------
+---
 
 # MOBILE FIRST (VERY IMPORTANT)
 
@@ -114,7 +114,7 @@ Responsive typography.
 
 Desktop should preserve the same layout as the reference image.
 
---------------------------------------------------
+---
 
 # THEME
 
@@ -154,7 +154,7 @@ Violet
 
 Very subtle gradients only.
 
---------------------------------------------------
+---
 
 # TYPOGRAPHY
 
@@ -172,7 +172,7 @@ Bold headlines.
 
 Comfortable reading width.
 
---------------------------------------------------
+---
 
 # NAVIGATION
 
@@ -202,7 +202,7 @@ On Mobile
 
 Hamburger Menu.
 
---------------------------------------------------
+---
 
 # HERO SECTION
 
@@ -236,7 +236,7 @@ Buttons stack vertically on mobile.
 
 Hero occupies nearly full screen.
 
---------------------------------------------------
+---
 
 # TRUST SECTION
 
@@ -260,7 +260,7 @@ Built-in Tools
 
 Bring Your Own AI
 
---------------------------------------------------
+---
 
 # WHAT IS BITBOUNDPAY
 
@@ -272,7 +272,7 @@ BitBoundPay is an AI Agent Operating System built for developers and businesses.
 
 Instead of locking users into one ecosystem, BitBoundPay lets them connect AI from anywhere and manage everything from one platform.
 
---------------------------------------------------
+---
 
 # FEATURES
 
@@ -340,7 +340,7 @@ Payments
 
 Built-in payment workflows.
 
---------------------------------------------------
+---
 
 # HOW IT WORKS
 
@@ -368,7 +368,7 @@ Deploy
 
 Chat, Automate & Scale
 
---------------------------------------------------
+---
 
 # SUPPORTED AGENT SOURCES
 
@@ -386,7 +386,7 @@ Local AI Services
 
 Remote API (Coming Soon)
 
---------------------------------------------------
+---
 
 # WHY BITBOUNDPAY
 
@@ -410,7 +410,7 @@ Knowledge Base.
 
 Future Marketplace.
 
---------------------------------------------------
+---
 
 # ROADMAP
 
@@ -458,7 +458,7 @@ Autonomous Multi-Agent Runtime
 
 Enterprise Ecosystem
 
---------------------------------------------------
+---
 
 # WAITLIST SECTION
 
@@ -490,7 +490,7 @@ You're on the waitlist.
 
 We'll notify you when BitBoundPay launches.
 
---------------------------------------------------
+---
 
 # FOOTER
 
@@ -512,7 +512,7 @@ Twitter/X
 
 Copyright © BitBoundPay
 
---------------------------------------------------
+---
 
 # ANIMATIONS
 
@@ -534,7 +534,7 @@ Respect prefers-reduced-motion.
 
 No flashy animations.
 
---------------------------------------------------
+---
 
 # PERFORMANCE
 
@@ -554,7 +554,7 @@ Optimized Fonts
 
 Semantic HTML
 
---------------------------------------------------
+---
 
 # TECH STACK
 
@@ -572,7 +572,7 @@ Responsive Layout
 
 Modern Folder Structure
 
---------------------------------------------------
+---
 
 # DESIGN RULES
 
@@ -617,12 +617,16 @@ npm run dev
 
 ## Waitlist email verification
 
-Configure these server-side environment variables before deploying the waitlist flow:
+Supabase Auth sends the confirmation email. In Supabase Dashboard → Authentication → Providers → Email, keep **Confirm email** enabled. Add the production site origin and `/verify-waitlist` to Authentication → URL Configuration → Redirect URLs.
 
-- `APP_URL`: Public application origin used to build verification links, for example `https://bitboundpay.com`.
-- `RESEND_API_KEY`: Resend API key authorized to send verification messages.
-- `RESEND_FROM_EMAIL`: Verified Resend sender, for example `BitBoundPay <waitlist@bitboundpay.com>`.
-- `SUPABASE_URL`: Supabase project URL.
-- `SUPABASE_SERVICE_ROLE_KEY`: Server-only Supabase service-role key. Never expose this value to client code.
+Client production variables:
 
-Apply the Supabase migrations before enabling submissions. Verification links expire after 24 hours, and an entry becomes active only after the recipient opens the link.
+- `VITE_SUPABASE_URL`: The Supabase project URL, for example `https://nbqjsbutphmiixikzzak.supabase.co`.
+- `VITE_SUPABASE_PUBLISHABLE_KEY`: The Supabase publishable/anon key for that same project. Never use a service-role key here.
+
+Server production variables:
+
+- `SUPABASE_URL`: The same Supabase project URL.
+- `SUPABASE_SERVICE_ROLE_KEY`: Server-only service-role key. Never expose this value to client code.
+
+Apply the Supabase migrations before enabling submissions. A row remains pending until the Supabase Auth user is confirmed; the database unique index prevents duplicate verified emails.

@@ -18,7 +18,12 @@ export default defineTool({
       .describe("Optional note about what they are building."),
   },
   outputSchema: { joined: z.boolean(), message: z.string() },
-  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: true,
+  },
   handler: async ({ name, email, building }) => {
     const fail = (message: string) => ({
       content: [{ type: "text" as const, text: message }],
@@ -27,8 +32,8 @@ export default defineTool({
     });
 
     try {
-      const { beginWaitlistVerification } = await import("../../waitlist.service");
-      const result = await beginWaitlistVerification({
+      const { beginWaitlistVerificationFromServer } = await import("../../waitlist.service");
+      const result = await beginWaitlistVerificationFromServer({
         name,
         email,
         ...(building === undefined ? {} : { building }),
@@ -45,4 +50,3 @@ export default defineTool({
     }
   },
 });
-

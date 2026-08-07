@@ -4,6 +4,7 @@ import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
 import { emailSchema } from "@/lib/email-validation";
 import { joinWaitlist } from "@/lib/waitlist.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { Reveal } from "./Reveal";
 
 const schema = z.object({
@@ -28,7 +29,17 @@ export function Waitlist() {
     setError(null);
     setStatus("loading");
     try {
-      const result = await submit({ data: parsed.data });
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: parsed.data.email,
+        password: crypto.randomUUID() + crypto.randomUUID(),
+        options: {
+          data: { waitlist_name: parsed.data.name },
+          emailRedirectTo: `${window.location.origin}/verify-waitlist`,
+        },
+      });
+      if (authError || !authData.user)
+        throw authError ?? new Error("Supabase Auth did not create a user");
+      const result = await submit({ data: { ...parsed.data, authUserId: authData.user.id } });
       if (!result.success) {
         setStatus("idle");
         setError(result.message);
@@ -42,12 +53,14 @@ export function Waitlist() {
     }
   };
 
-
   const field =
     "w-full rounded-xl border border-border bg-surface px-4 py-4 text-base text-foreground placeholder:text-muted-foreground/60 outline-none transition-colors focus:border-primary/60 focus:ring-2 focus:ring-ring";
 
   return (
-    <section id="waitlist" className="relative overflow-hidden border-t border-border px-5 py-24 sm:px-8 sm:py-36">
+    <section
+      id="waitlist"
+      className="relative overflow-hidden border-t border-border px-5 py-24 sm:px-8 sm:py-36"
+    >
       <div
         aria-hidden
         className="pointer-events-none absolute bottom-[-40%] left-1/2 h-[420px] w-[min(900px,120vw)] -translate-x-1/2 rounded-[50%] opacity-20 blur-[120px]"
@@ -62,7 +75,6 @@ export function Waitlist() {
             Be among the first to build on the AI Agent Operating System.
           </p>
         </Reveal>
-
         <Reveal delay={0.12}>
           {status === "done" ? (
             <div className="surface-card mt-12 rounded-2xl px-6 py-14 text-center">
@@ -121,13 +133,11 @@ export function Waitlist() {
                   placeholder="Tell us what you want to build with BitBoundPay..."
                 />
               </div>
-
               {error && (
                 <p role="alert" className="text-sm text-destructive">
                   {error}
                 </p>
               )}
-
               <button
                 type="submit"
                 disabled={status === "loading"}

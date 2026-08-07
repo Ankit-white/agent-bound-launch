@@ -1,14 +1,11 @@
 import { isDisposableDomain, normalizeEmail } from "./email-validation";
-import {
-  createVerificationToken,
-  hashVerificationToken,
-  verificationTokenExpiresAt,
-} from "./waitlist-verification";
+import { verificationTokenExpiresAt } from "./waitlist-verification";
 
 export type WaitlistRequest = {
   name: string;
   email: string;
   building?: string;
+  authUserId: string;
 };
 
 export type WaitlistResult = {
@@ -18,49 +15,26 @@ export type WaitlistResult = {
 
 const CHECK_INBOX_MESSAGE = "Check your inbox to verify your email and join the waitlist.";
 
-function requiredEnv(name: string): string {
-  const value = process.env[name]?.trim();
-  if (!value) throw new Error(`Missing ${name}`);
-  return value;
+function publicAppUrl(): string {
+  const value = process.env["APP_URL"]?.trim();
+  if (!value) throw new Error("Missing APP_URL for the Supabase Auth redirect");
+  return value.replace(/\/$/, "");
 }
 
-function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, (character) => {
-    const entities: Record<string, string> = {
-      "&": "\u0026amp;",
-      "<": "\u0026lt;",
-      ">": "\u0026gt;",
-      '"': "\u0026quot;",
-      "'": "\u0026#39;",
-    };
-    return entities[character] ?? character;
-  });
-}
-
-async function sendVerificationEmail(input: {
-  email: string;
-  name: string;
-  verificationUrl: string;
-}): Promise<void> {
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${requiredEnv("RESEND_API_KEY")}`,
-      "Content-Type": "application/json",
+export async function beginWaitlistVerificationFromServer(
+  input: Omit<WaitlistRequest, "authUserId">,
+): Promise<WaitlistResult> {
+  const { createSupabaseAuthClient } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await createSupabaseAuthClient().auth.signUp({
+    email: normalizeEmail(input.email),
+    password: `${crypto.randomUUID()}${crypto.randomUUID()}`,
+    options: {
+      data: { waitlist_name: input.name },
+      emailRedirectTo: `${publicAppUrl()}/verify-waitlist`,
     },
-    body: JSON.stringify({
-      from: requiredEnv("RESEND_FROM_EMAIL"),
-      to: [input.email],
-      subject: "Confirm your BitBoundPay waitlist email",
-      html: `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#171717"><p>Hi ${escapeHtml(input.name)},</p><p>Confirm your email to activate your BitBoundPay waitlist entry.</p><p><a href="${escapeHtml(input.verificationUrl)}">Verify email</a></p><p>This link expires in 24 hours.</p></body></html>`,
-      text: `Hi ${input.name},\n\nConfirm your email to activate your BitBoundPay waitlist entry:\n${input.verificationUrl}\n\nThis link expires in 24 hours.`,
-    }),
   });
-
-  if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(`Resend rejected the email (${response.status}): ${detail.slice(0, 500)}`);
-  }
+  if (error || !data.user) throw error ?? new Error("Supabase Auth did not create a user");
+  return beginWaitlistVerification({ ...input, authUserId: data.user.id });
 }
 
 export async function beginWaitlistVerification(input: WaitlistRequest): Promise<WaitlistResult> {
@@ -70,49 +44,60 @@ export async function beginWaitlistVerification(input: WaitlistRequest): Promise
     return { success: false, message: "Please use a permanent email address." };
   }
 
-  const token = createVerificationToken();
-  const tokenHash = await hashVerificationToken(token);
-  const expiresAt = verificationTokenExpiresAt();
-  const appUrl = requiredEnv("APP_URL").replace(/\/$/, "");
-  const verificationUrl = `${appUrl}/verify-waitlist?token=${encodeURIComponent(token)}`;
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: userResult, error: userError } = await supabaseAdmin.auth.admin.getUserById(
+    input.authUserId,
+  );
+  if (userError || !userResult.user || userResult.user.email_confirmed_at) {
+    return userResult.user?.email_confirmed_at
+      ? {
+          success: false,
+          message: "This email has already been verified. Please use the waitlist entry.",
+        }
+      : { success: false, message: "Please verify your email before joining the waitlist." };
+  }
+  if (normalizeEmail(userResult.user.email ?? "") !== email) {
+    return { success: false, message: "The email does not match the verification account." };
+  }
 
   const { data, error } = await supabaseAdmin.rpc("begin_waitlist_verification", {
     p_signup_name: input.name,
     p_signup_email: email,
     p_signup_building: input.building ?? "",
-    p_token_hash: tokenHash,
-    p_token_expires_at: expiresAt.toISOString(),
+    p_token_hash: null,
+    p_token_expires_at: verificationTokenExpiresAt().toISOString(),
+    p_auth_user_id: input.authUserId,
   });
-
   if (error) throw error;
   const row = data[0];
   if (!row || row.result === "already_verified") {
     return { success: false, message: "You're already on the waitlist." };
   }
-
-  try {
-    await sendVerificationEmail({ email, name: input.name, verificationUrl });
-  } catch (error) {
-    await supabaseAdmin.rpc("cancel_waitlist_verification", {
-      p_signup_id: row.signup_id!,
-      p_token_hash: tokenHash,
-    });
-    throw error;
-  }
-
   return { success: true, message: CHECK_INBOX_MESSAGE };
 }
 
-export async function confirmWaitlistVerification(
-  token: string,
-): Promise<"verified" | "expired" | "invalid"> {
-  if (!/^[A-Za-z0-9_-]{43}$/.test(token)) return "invalid";
-
+export async function activateVerifiedWaitlistEntry(
+  userId: string,
+  email: string,
+): Promise<WaitlistResult> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin.rpc("confirm_waitlist_verification", {
-    p_token_hash: await hashVerificationToken(token),
+  const { data: userResult, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId);
+  if (userError || !userResult.user || !userResult.user.email_confirmed_at) {
+    return { success: false, message: "Please verify your email before joining the waitlist." };
+  }
+  const normalizedEmail = normalizeEmail(email);
+  if (normalizeEmail(userResult.user.email ?? "") !== normalizedEmail) {
+    return { success: false, message: "The verified email does not match this waitlist entry." };
+  }
+
+  const { data, error } = await supabaseAdmin.rpc("activate_waitlist_for_verified_user", {
+    p_user_id: userId,
+    p_email: normalizedEmail,
   });
   if (error) throw error;
-  return data === "verified" || data === "expired" ? data : "invalid";
+  if (data === "already_verified")
+    return { success: false, message: "You're already on the waitlist." };
+  if (data !== "verified")
+    return { success: false, message: "No pending waitlist entry was found." };
+  return { success: true, message: "Your waitlist entry is now active." };
 }

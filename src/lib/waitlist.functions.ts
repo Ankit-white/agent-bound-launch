@@ -9,11 +9,11 @@ const inputSchema = z.object({
 });
 
 export const joinWaitlist = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => inputSchema.parse(data))
+  .validator((data: unknown) => inputSchema.parse(data))
   .handler(async ({ data }) => {
     try {
-      const { beginWaitlistVerification } = await import("@/lib/waitlist.service");
-      return await beginWaitlistVerification(data);
+      const { beginWaitlistVerificationFromServer } = await import("@/lib/waitlist.service");
+      return await beginWaitlistVerificationFromServer(data);
     } catch (error) {
       console.error("[Waitlist] Verification request failed", error);
       return { success: false as const, message: "Something went wrong. Please try again." };
