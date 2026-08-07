@@ -40,7 +40,7 @@ export function Hero() {
         >
           The AI Agent
           <br />
-          <span className="text-gradient italic">Operating System</span>
+          <span className="text-primary italic">Operating System</span>
         </motion.h1>
 
         <motion.p
