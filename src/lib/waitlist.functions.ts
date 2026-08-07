@@ -15,6 +15,16 @@ export const joinWaitlist = createServerFn({ method: "POST" })
       const { beginWaitlistVerificationFromServer } = await import("@/lib/waitlist.service");
       return await beginWaitlistVerificationFromServer(data);
     } catch (error) {
+      const present = (value: unknown) => typeof value === "string" && value.trim().length > 0;
+      console.error("[Waitlist] Runtime configuration diagnostics", {
+        "Running Environment": "Server",
+        "SUPABASE_URL present?": present(process.env["SUPABASE_URL"]),
+        "SUPABASE_PUBLISHABLE_KEY present?": present(process.env["SUPABASE_PUBLISHABLE_KEY"]),
+        "VITE_SUPABASE_URL present?": present(import.meta.env["VITE_SUPABASE_URL"]),
+        "VITE_SUPABASE_PUBLISHABLE_KEY present?": present(
+          import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"],
+        ),
+      });
       console.error("[Waitlist] Verification request failed", error);
       return { success: false as const, message: "Something went wrong. Please try again." };
     }
